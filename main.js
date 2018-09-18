@@ -29,12 +29,11 @@ server.listen(port, (err) => {
 		throw err;
 	}
 	/* eslint-disable no-console */
+    console.log("ELASTIC_ENDPOINT: " + endpoint);
 	console.log('Node Endpoints working :)');
 });
 
 module.exports = server;
-
-console.log("ELASTIC_ENDPOINT: " + endpoint);
 
 app.post('/demotfs/created/', (req, res) => {
     performRequest(endpoint, "/demotfs/created/", req.body, function(data, path){
