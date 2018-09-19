@@ -35,8 +35,8 @@ server.listen(port, (err) => {
 
 module.exports = server;
 
-app.post('/demotfs/created/', (req, res) => {
-    performRequest(endpoint, "/tfscreated/", req.body, function(data, path){
+app.post('/tfscreated/created/', (req, res) => {
+    performRequest(endpoint, "/tfscreated/created", req.body, function(data, path){
         console.log(path);
         res.status(200);
         res.send('working');
@@ -44,8 +44,8 @@ app.post('/demotfs/created/', (req, res) => {
     });
 });
 
-app.post('/demotfs/updated/', (req, res) => {
-    performRequest(endpoint, "/tfsupdated/", req.body, function(data, path){
+app.post('/tfsupdated/updated/', (req, res) => {
+    performRequest(endpoint, "/tfsupdated/updated", req.body, function(data, path){
         console.log(path);
         res.status(200);
         res.send('working');
