@@ -107,26 +107,26 @@ function performRequest(host, endpoint, dataString, id, success) {
 
 function generateCreatedPayload(workitem){
     var obj = {
-        "rev": workitem._source.resource.rev,
-        "title": workitem._source.resource.fields["System.Title"],
-        "requestStatus": workitem._source.resource.fields["Custom.RequestStatus"]
+        "rev": workitem.resource.rev,
+        "title": workitem.resource.fields["System.Title"],
+        "requestStatus": workitem.resource.fields["Custom.RequestStatus"]
         }
     return obj;
 }
 
 function getCreatedId(workitem){
-    return workitem._source.resource.id;
+    return workitem.resource.id;
 }
 
 function generateUpdatedPayload(workitem){
     var obj = {
-        "rev": workitem._source.resource.revision.rev,
-        "title": workitem._source.resource.revision.fields["System.Title"],
-        "requestStatus": workitem._source.resource.revision.fields["Custom.RequestStatus"]
+        "rev": workitem.resource.revision.rev,
+        "title": workitem.resource.revision.fields["System.Title"],
+        "requestStatus": workitem.resource.revision.fields["Custom.RequestStatus"]
         }
     return obj;
 }
 
 function getUpdatedId(workitem){
-    return workitem._source.resource.revision.id;
+    return workitem.resource.revision.id;
 }
