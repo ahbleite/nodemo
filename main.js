@@ -35,8 +35,8 @@ server.listen(port, (err) => {
 
 module.exports = server;
 
-app.post('/tfscreated/created/', (req, res) => {
-    performRequest(endpoint, "/tfscreated/created/", req.body, function(data, path){
+app.post('/tecegprodutos/created/', (req, res) => {
+    performCreatedRequest(endpoint, "/tecegprodutos/workitem/", req.body, function(data, path){
         console.log(path);
         res.status(200);
         res.send('working');
@@ -44,8 +44,8 @@ app.post('/tfscreated/created/', (req, res) => {
     });
 });
 
-app.post('/tfsupdated/updated/', (req, res) => {
-    performRequest(endpoint, "/tfsupdated/updated/", req.body, function(data, path){
+app.post('/tecegprodutos/updated/', (req, res) => {
+    performUpdatedRequest(endpoint, "/tecegprodutos/workitem/", req.body, function(data, path){
         console.log(path);
         res.status(200);
         res.send('working');
@@ -53,43 +53,80 @@ app.post('/tfsupdated/updated/', (req, res) => {
     })
 });
 
+function performCreatedRequest(host, endpoint, data, success) {
+    var dataString = JSON.stringify(generateCreatedPayload(data));
+    var id = getCreatedId(data)
+    performRequest(host, endpoint, dataString, id, success);
+}
 
-function performRequest(host, endpoint, data, success) {
-        var dataString = JSON.stringify(data);
+function performUpdatedRequest(host, endpoint, data, success) {
+    var dataString = JSON.stringify(generateUpdatedPayload(data));
+    var id = getUpdatedId(data)
+    performRequest(host, endpoint, dataString, id, success);
+}
 
-        var headers = {
-            'Content-Type': 'application/json',
-            'Content-Length': dataString.length
-        };
-        
-        var options = {
-            host: host,
-            path: endpoint + uuidv1().toString(),
-            method: "POST",
-            headers: headers
-        };
+
+function performRequest(host, endpoint, dataString, id, success) {
+
+    var headers = {
+        'Content-Type': 'application/json',
+        'Content-Length': dataString.length
+    };
     
-        var req = https.request(options, function (res) {
-                res.setEncoding('utf-8');
-    
-                var responseString = '';
-    
-                res.on('data', function (data) {
-                    responseString += data;
-                });
-    
-                res.on('end', function () {
-                    console.log("Response: " + responseString);
-                    var responseObject = JSON.parse(responseString);
-                    success(responseObject, options.path);
-                });
+    var options = {
+        host: host,
+        path: endpoint + id,
+        method: "POST",
+        headers: headers
+    };
+
+    var req = https.request(options, function (res) {
+            res.setEncoding('utf-8');
+
+            var responseString = '';
+
+            res.on('data', function (data) {
+                responseString += data;
             });
-            
-        req.on('error', function(err) {
-            console.log("Error");
-            req.end();
+
+            res.on('end', function () {
+                console.log("Response: " + responseString);
+                var responseObject = JSON.parse(responseString);
+                success(responseObject, options.path);
+            });
         });
-    
-        req.write(dataString);
+        
+    req.on('error', function(err) {
+        console.log("Error");
         req.end();
-    }
+    });
+
+    req.write(dataString);
+    req.end();
+}
+
+function generateCreatedPayload(workitem){
+    var obj = {
+        "rev": workitem._source.resource.rev,
+        "title": workitem._source.resource.fields["System.Title"],
+        "requestStatus": workitem._source.resource.fields["Custom.RequestStatus"]
+        }
+    return obj;
+}
+
+function getCreatedId(workitem){
+    return workitem._source.resource.id;
+}
+
+function generateUpdatedPayload(workitem){
+    var obj = {
+        "rev": workitem._source.resource.revision.rev,
+        "title": workitem._source.resource.revision.fields["System.Title"],
+        "requestStatus": workitem._source.resource.revision.fields["Custom.RequestStatus"]
+        }
+    return obj;
+}
+
+function getUpdatedId(workitem){
+    return workitem._source.resource.revision.id;
+}
