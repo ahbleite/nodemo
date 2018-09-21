@@ -4,9 +4,13 @@ const bodyParser = require('body-parser');
 const app = express();
 const server = require('http').Server(app);
 var https = require('https');
-const port = 3000;
+var jp = require('jsonpath');
 const helmet = require('helmet');
+
 const endpoint = process.env.ELASTIC_ENDPOINT;
+const parentUrl = process.env.PARENT_URL;
+const port = 3000;
+
 
 app.use(helmet());
 app.use(bodyParser.json());
@@ -30,27 +34,42 @@ server.listen(port, (err) => {
 	}
 	/* eslint-disable no-console */
     console.log("ELASTIC_ENDPOINT: " + endpoint);
+    console.log("PARENT_URL: " + parentUrl);
 	console.log('Node Endpoints working :)');
 });
 
 module.exports = server;
 
 app.post('/tecegprodutos/created/', (req, res) => {
-    performCreatedRequest(endpoint, "/tecegprodutos/workitem/", req.body, function(data, path){
-        console.log(path);
-        res.status(200);
-        res.send('working');
-        res.end();
-    });
+    var path = '$.resource.relations[?(@.url=="' + parentUrl + '")]';
+    var x = jp.query(req.body, path);
+    if(x.length>0){
+        performCreatedRequest(endpoint, "/tecegprodutos/workitem/", req.body, function(data, path){
+            console.log(path);
+            res.status(200);
+            res.send('working');
+            res.end();
+        });
+    }
+    else{
+        console.log("Workitem ignored.");
+    }
 });
 
 app.post('/tecegprodutos/updated/', (req, res) => {
-    performUpdatedRequest(endpoint, "/tecegprodutos/workitem/", req.body, function(data, path){
-        console.log(path);
-        res.status(200);
-        res.send('working');
-        res.end();
-    })
+    var path = '$.resource.relations[?(@.url=="' + parentUrl + '")]';
+    var x = jp.query(req.body, path);
+    if(x.length>0){
+        performUpdatedRequest(endpoint, "/tecegprodutos/workitem/", req.body, function(data, path){
+            console.log(path);
+            res.status(200);
+            res.send('working');
+            res.end();
+        });
+    }
+    else{
+        console.log("Workitem ignored.");
+    }    
 });
 
 function performCreatedRequest(host, endpoint, data, success) {
